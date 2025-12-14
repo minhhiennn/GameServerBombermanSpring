@@ -1,0 +1,25 @@
+services:
+  mysql:
+    platform: linux/x86_64
+    image: mysql:8.0.36
+    container_name: boomer-mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --default-time-zone=Asia/Ho_Chi_Minh
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: boomerGame
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user_password
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
