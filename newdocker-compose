@@ -1,0 +1,44 @@
+services:
+  mysql:
+    platform: linux/x86_64
+    image: mysql:8.0.36
+    container_name: mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --default-time-zone=Asia/Ho_Chi_Minh
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: boomerGame
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user_password
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+  server:
+    build: ./GameServerBombermanSpring
+    container_name: game-server
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/boomerGame?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: user_password
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
