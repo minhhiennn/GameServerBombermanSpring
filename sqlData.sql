@@ -86,9 +86,10 @@ VALUES
 
 select * from rooms;
 select * from room_players;
+select * from matches;
 
-delete from rooms where id between 30 AND 41;
-delete from room_players where room_id between 30 AND 41;
+delete from rooms where id between 30 AND 53;
+delete from room_players where room_id between 30 AND 53;
 
 ------------------------------------------
 #SQL lấy list room + số người, chỉ WAITING

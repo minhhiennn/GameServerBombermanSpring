@@ -8,10 +8,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/room")
 public class RoomController {
+
     private final RoomServices roomServices;
+
     public RoomController(RoomServices roomServices) {
         this.roomServices = roomServices;
     }
+
     @GetMapping("/list")
     public ResponseEntity<?> getRoomsList() {
         try {
@@ -23,6 +26,7 @@ public class RoomController {
                     .body("Failed to retrieve room list");
         }
     }
+
     @GetMapping("/roomDetails/{roomCode}")
     public ResponseEntity<?> getRoomDetails(@PathVariable String roomCode) {
         try {
@@ -35,6 +39,7 @@ public class RoomController {
                     .body("Failed to retrieve room details");
         }
     }
+
     @PostMapping("/create")
     public ResponseEntity<?> createRoom(@RequestHeader("Authorization") String username) {
         try {
@@ -46,6 +51,7 @@ public class RoomController {
                     .body("Failed to create room");
         }
     }
+
     @PostMapping("/join")
     public ResponseEntity<?> joinRoom(@RequestHeader("Authorization") String username, @RequestBody String roomCode) {
         try {
@@ -57,6 +63,7 @@ public class RoomController {
                     .body("Failed to join room");
         }
     }
+
     @PostMapping("/leave")
     public ResponseEntity<?> leaveRoom(@RequestHeader("Authorization") String username, @RequestBody String roomCode) {
         try {
@@ -66,6 +73,18 @@ public class RoomController {
             return ResponseEntity
                     .badRequest()
                     .body("Failed to leave room");
+        }
+    }
+
+    @PostMapping("/start")
+    public ResponseEntity<?> startGame(@RequestHeader("Authorization") String username, @RequestBody String roomCode) {
+        try {
+            roomServices.startGame(username, roomCode.replaceAll("\"", ""));
+            return ResponseEntity.ok("Start Game API is working");
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Failed to start game");
         }
     }
 }

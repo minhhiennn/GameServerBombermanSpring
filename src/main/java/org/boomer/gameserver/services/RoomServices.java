@@ -5,10 +5,9 @@ import org.boomer.gameserver.controller.websocket.RoomEnum;
 import org.boomer.gameserver.dto.response.PlayerDetailsDTOResponse;
 import org.boomer.gameserver.dto.response.RoomDetailsDTOResponse;
 import org.boomer.gameserver.dto.response.RoomListDTOResponse;
-import org.boomer.gameserver.entities.Room;
-import org.boomer.gameserver.entities.RoomPlayer;
-import org.boomer.gameserver.entities.RoomPlayerRole;
+import org.boomer.gameserver.entities.*;
 import org.boomer.gameserver.projection.RoomWaitingProjection;
+import org.boomer.gameserver.repositories.MatchRepository;
 import org.boomer.gameserver.repositories.RoomPlayerRepository;
 import org.boomer.gameserver.repositories.RoomRepository;
 import org.boomer.gameserver.repositories.UserRepository;
@@ -24,13 +23,16 @@ import java.util.UUID;
 public class RoomServices {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final MatchRepository matchRepository;
     private final RoomPlayerRepository roomPlayerRepository;
     private final WebSocketService webSocketService;
-    public RoomServices(RoomRepository roomRepository, UserRepository userRepository, RoomPlayerRepository roomPlayerRepository, WebSocketService webSocketService) {
+
+    public RoomServices(RoomRepository roomRepository, UserRepository userRepository, RoomPlayerRepository roomPlayerRepository, WebSocketService webSocketService, MatchRepository matchRepository) {
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
         this.roomPlayerRepository = roomPlayerRepository;
         this.webSocketService = webSocketService;
+        this.matchRepository = matchRepository;
     }
 
     public List<RoomListDTOResponse> getListRoom() {
@@ -154,6 +156,39 @@ public class RoomServices {
                                 room,
                                 user
                         );
+                    }
+                }
+        );
+    }
+
+    @Transactional
+    public void startGame(String username, String roomCode) {
+        // To be implemented
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        var room = roomRepository.findByRoomCode(roomCode)
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+
+        Match newMatch = new Match();
+
+        if (room.getOwnerId().equals(user.getId())) {
+            try {
+                System.out.println("authorized to start game");
+                room.setStatus(RoomStatus.PLAYING);
+                newMatch.setRoom(room);
+                matchRepository.save(newMatch);
+                roomRepository.save(room);
+            } catch (Exception e) {
+                System.out.println("error when starting game: " + e.getMessage());
+            }
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        webSocketService.notifyGameStart(room, newMatch);
                     }
                 }
         );

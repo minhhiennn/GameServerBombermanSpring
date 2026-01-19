@@ -5,6 +5,7 @@ import org.boomer.gameserver.entities.RoomPlayerId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RoomPlayerRepository extends JpaRepository<RoomPlayer, RoomPlayerId> {
 
@@ -15,4 +16,8 @@ public interface RoomPlayerRepository extends JpaRepository<RoomPlayer, RoomPlay
     void deleteByRoom_Id(Integer roomId);
 
     void deleteByRoom_IdAndUserId(Integer roomId, Integer userId);
+
+    Optional<RoomPlayer> findByUserId(Integer userId);
+
+    List<RoomPlayer> findAllByRoom_Id(Integer roomId);
 }

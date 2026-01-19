@@ -4,4 +4,5 @@ public enum RoomEnum {
     JOIN,
     CREATE,
     LEAVE,
+    START
 }
